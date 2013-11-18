@@ -2,7 +2,7 @@ CROSS_HOST="i686-w64-mingw32"
 inherit cross
 
 NAME="mingw64-i686-boost"
-VERSION=1.50.0
+VERSION=1.53.0
 RELEASE=1
 CATEGORY="Devel"
 SUMMARY="Boost C++ libraries for Win32 toolchain"
@@ -11,25 +11,26 @@ contains msvcrt-linked binaries (aka 'mingw').  It is for use with the
 mingw-gcc cross compiler, and installs into the
 /usr/i686-w64-mingw32/sys-root/mingw/{lib,include} directories."
 HOMEPAGE="http://www.boost.org/"
-SRC_URI="mirror://sourceforge/boost/boost_${PV//./_}.tar.bz2"
-SRC_DIR="boost_${PV//./_}"
+SRC_URI="mirror://sourceforge/boost/boost_${VERSION//./_}.tar.bz2"
+SRC_DIR="boost_${VERSION//./_}"
 
 PATCH_URI="
 	fedora/boost-1.48.0-add-bjam-man-page.patch
-	fedora/boost-1.50.0-attribute.patch
+	fedora/boost-1.53.0-attribute.patch
+	fedora/boost-1.53.0-context.patch
 	fedora/boost-1.50.0-fix-non-utf8-files.patch
 	fedora/boost-1.50.0-foreach.patch
 	fedora/boost-1.50.0-long-double-1.patch
 	fedora/boost-1.50.0-polygon.patch
 	fedora/boost-1.50.0-pool.patch
-	fedora/boost-1.50.0-signals-erase.patch
+	fedora/boost-include-intrin-h-on-mingw-w64.patch
 	fedora/boost-mingw.patch
 	1.45.0-jam-cygwin.patch
 "
 
-case ${PV} in
-	*.0)	dll_v=${PV%.0} ;;
-	*)	dll_v=${PV} ;;
+case ${VERSION} in
+	*.0)	dll_v=${VERSION%.0} ;;
+	*)	dll_v=${VERSION} ;;
 esac
 
 DIFF_EXCLUDES="boostbook html *.test"
@@ -56,7 +57,7 @@ _EOF
 		--without-mpi \
 		--without-python \
 		release toolset=gcc-mingw32 target-os=windows \
-		threading=single,multi link=shared pch=off \
+		threading=single,multi link=shared,static pch=off \
 		${MAKEOPTS}
 }
 
@@ -67,7 +68,6 @@ src_install() {
 
 	dodir ${CROSS_INCLUDEDIR}
 	cp -r ${S}/boost ${D}${CROSS_INCLUDEDIR}
-	find ${D}/usr/include/ -type f -name '*.orig' -delete
 
 	dodoc README LICENSE_1_0.txt
 }
